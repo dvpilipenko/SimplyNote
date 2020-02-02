@@ -1,0 +1,29 @@
+{
+  "name": "SimplyNote",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "webpack",
+    "start": "webpack-dev-server"
+  },
+  "keywords": [],
+  "author": "Pilipenko Dmitriy",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jquery": "^3.3.31",
+    "@types/node": "^12.12.21",
+    "html-webpack-plugin": "^4.0.0-beta.11",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.5",
+    "webpack": "^4.41.5",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.10.2"
+  },
+  "dependencies": {
+    "@types/underscore": "^1.9.4",
+    "jquery": "^3.4.1",
+    "underscore": "^1.9.2",
+    "webpack": "^4.41.5"
+  }
+}
