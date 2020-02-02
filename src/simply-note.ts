@@ -30,12 +30,12 @@ const screenSize = {
     height: 768,
     width: 1024,
 };
-const errorMessage =  `your screen does not meet the required sizes: ${screenSize.width} x ${screenSize.height}`;
+const errorMessage = `your screen does not meet the required sizes: ${screenSize.width} x ${screenSize.height}`;
 
 
 export class SimplyNote {
     constructor(htmlElement: JQuery<HTMLElement>, height: number, width: number) {
-        if(!this.isNecessaryScreenSize()){
+        if (!this.isNecessaryScreenSize()) {
             htmlElement.append(errorMessage);
             return;
         }
@@ -47,6 +47,7 @@ export class SimplyNote {
         this.field = {htmlElement, height, width};
 
     }
+
     field: { htmlElement: JQuery<HTMLElement>, height: number, width: number };
 
     addNote(note: Note) {
@@ -166,7 +167,6 @@ export class SimplyNote {
     loadFromLocalStorage() {
         const notes = Utils.getItemFromLocalstorage('notes');
         if (!notes) {
-            alert('Nothing Loaded!');
             return;
         }
         this.field.htmlElement.empty();

@@ -7,6 +7,7 @@ class App {
         const div = $('#field');
         this.simplyNote = new SimplyNote(div, 800, 800);
         this.initEvents();
+        this.simplyNote.loadFromLocalStorage();
     }
 
     simplyNote: SimplyNote;
