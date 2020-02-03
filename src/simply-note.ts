@@ -32,7 +32,6 @@ const screenSize = {
 };
 const errorMessage = `your screen does not meet the required sizes: ${screenSize.width} x ${screenSize.height}`;
 
-
 export class SimplyNote {
     constructor(htmlElement: JQuery<HTMLElement>, height: number, width: number) {
         if (!this.isNecessaryScreenSize()) {
@@ -45,7 +44,6 @@ export class SimplyNote {
         htmlElement.height(height);
         htmlElement.width(width);
         this.field = {htmlElement, height, width};
-
     }
 
     field: { htmlElement: JQuery<HTMLElement>, height: number, width: number };
