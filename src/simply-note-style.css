@@ -1,0 +1,29 @@
+.simply-field {
+    border: 2px double red;
+    position: absolute;
+    overflow: visible;
+}
+
+.simply-note {
+    position: absolute;
+    overflow: hidden;
+    border: 1px solid green;
+}
+
+.simply-note_standard {
+    background-color: yellow;
+}
+
+.simply-note_trash {
+    background-color: red;
+}
+
+.simply-note__textarea {
+    background-color: transparent;
+    height: inherit;
+    width: inherit;
+    border: none;
+    outline: none;
+    resize: none;
+    overflow-y: hidden;
+}

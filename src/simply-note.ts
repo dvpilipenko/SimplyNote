@@ -1,6 +1,7 @@
 import $ from "jquery";
 import _ from "underscore";
 import {Utils} from "./utils";
+import './simply-note-style.css'
 
 export type Note = {
     width: number,
@@ -10,17 +11,6 @@ export type Note = {
     zIndex?: number,
     text?: string
 }
-
-/**
- * noteColor - basic color added Note
- * noteBorderColor - border Note
- * noteColorInTrashZone - color that will indicate the way out of the zone
- */
-const colors = {
-    noteColor: 'yellow',
-    noteBorderColor: 'green',
-    noteColorInTrashZone: 'red',
-};
 
 /**
  * Minimum screen size
@@ -38,15 +28,13 @@ export class SimplyNote {
             htmlElement.append(errorMessage);
             return;
         }
-        htmlElement.css('border', `2px double red`);
-        htmlElement.css('position', `absolute`);
-        htmlElement.css('overflow', `visible`);
+        htmlElement.addClass('simply-field');
         htmlElement.height(height);
         htmlElement.width(width);
-        this.field = {htmlElement, height, width};
+        this.field = htmlElement;
     }
 
-    field: { htmlElement: JQuery<HTMLElement>, height: number, width: number };
+    field: JQuery<HTMLElement>
 
     addNote(note: Note) {
         const htmlNote = $("<div></div>");
@@ -55,28 +43,35 @@ export class SimplyNote {
         htmlNote.height(note.height);
         htmlNote.width(note.width);
 
+        htmlNote.addClass('simply-note simply-note_standard')
         htmlNote.css("left", note.xPos);
         htmlNote.css("top", note.yPos);
-        htmlNote.css('border', `1px solid ${colors.noteBorderColor}`);
-        htmlNote.css('background', colors.noteColor);
-        htmlNote.css('position', `absolute`);
-        htmlNote.css('overflow', `hidden`);
-        htmlNote.css('zIndex', note.zIndex ? note.zIndex : this._getMaxZIndex() + 1);
 
         htmlNote.append(this._createTextArea(note));
-        this.field.htmlElement.append(htmlNote);
+        this.field.append(htmlNote);
+
+        //Add an observer to the Note if it goes outside of the work area
+        this._addObserverIntersection(htmlNote);
+    }
+
+    private _addObserverIntersection(note: JQuery<HTMLElement>) {
+        const options = {
+            root: this.field.get(0),
+            rootMargin: '0px',
+            threshold: 1.0
+        }
+        const observer = new IntersectionObserver(this._intersectionCallBack.bind(null, note), options);
+        observer.observe(note.get(0));
+    }
+
+    private _intersectionCallBack(note: any, entries: any) {
+        note.toggleClass("simply-note_trash", !entries[entries.length - 1].isIntersecting);
     }
 
     private _createTextArea(note: Note): JQuery<HTMLElement> {
         const textArea = $(`<textarea></textarea>`);
+        textArea.addClass('simply-note__textarea')
         textArea.val(note.text);
-        textArea.css('background-color', `transparent`);
-        textArea.css('height', `inherit`);
-        textArea.css('width', `inherit`);
-        textArea.css('border', `none`);
-        textArea.css('outline', `none`);
-        textArea.css('resize', `none`);
-        textArea.css('overflow-y', `hidden`);
         return textArea;
     }
 
@@ -84,8 +79,17 @@ export class SimplyNote {
         return window.screen.availHeight >= screenSize.height && window.screen.availWidth >= screenSize.width;
     }
 
+
+    private _setOnTopElement(elem: JQuery<HTMLElement>) {
+        const htmlElem = elem.get(0);
+        const elements = this.field.children().toArray();
+        const index = elements.indexOf(htmlElem);
+        elements.splice(index, 1);
+        elements.push(htmlElem);
+        this.field.append(elements)
+    }
+
     private _addDraggable(elem: JQuery<HTMLElement>) {
-        const indicateTrashZone = this._getIndicatorForTrashZone(elem);
         // we set 'mousedown' handler only for note element, and 'mouseup' handler for root document
         // this is important if we are to move the mouse too quickly
         const root = $(document);
@@ -95,16 +99,13 @@ export class SimplyNote {
             startPositionX = e.clientX;
             startPositionY = e.clientY;
 
-            // for dragging element we are setting max zIndex + 1 that would raise it above all
-            elem.css('zIndex', this._getMaxZIndex() + 1);
+            // for dragging element set it on top
+            this._setOnTopElement(elem);
 
             root.on("mouseup", () => {
                 root.off("mouseup");
                 root.off("mousemove");
-                if (this._inTrashZone(elem)) {
-                    elem.remove();
-                }
-                this._optimizeZIndex();
+                this._clearTrashZone();
 
                 //focus textArea if it is clicked
                 elem.children().first().trigger('focus');
@@ -123,41 +124,16 @@ export class SimplyNote {
                         left: elem.offset().left - difPositionX
                     }
                 );
-                //when the note is out of field, to paint it in the appropriate color
-                indicateTrashZone();
             });
-
         });
     }
 
-    private _getIndicatorForTrashZone(elem: JQuery<HTMLElement>) {
-        return _.debounce(() => {
-            elem.css('background', this._inTrashZone(elem) ?
-                colors.noteColorInTrashZone : colors.noteColor);
-        }, 50);
-    }
-
-    private _inTrashZone(elem: JQuery<HTMLElement>) {
-        const offset = elem.offset();
-        return offset.left > this.field.width || offset.top > this.field.height || offset.top < 0 || offset.left < 0;
-    }
-
-    /**
-     * Optimize ZIndex, necessary because often dragging them could theoretically increase to infinity
-     */
-    private _optimizeZIndex() {
-        let zIndex = 1;
-        const sortedByZIndex = _.sortBy(this.field.htmlElement.children(), item => parseInt(item.style.zIndex));
-        sortedByZIndex.forEach(item => item.style.zIndex = (zIndex++).toString())
-    }
-
-    private _getMaxZIndex(): number {
-        const elem = _.max(this.field.htmlElement.children(), item => parseInt(item.style.zIndex));
-        return !_.isEmpty(elem) ? parseInt(elem.style.zIndex) : 0;
+    private _clearTrashZone() {
+        this.field.children('.simply-note_trash').remove()
     }
 
     saveInLocalStorage() {
-        const notes = _.map(this.field.htmlElement.children(), item => Utils.mapDivToNote(item));
+        const notes = _.map(this.field.children(), item => Utils.mapDivToNote(item));
         Utils.saveItemToLocalstorage('notes', notes);
         alert('Saved')
     }
@@ -167,7 +143,7 @@ export class SimplyNote {
         if (!notes) {
             return;
         }
-        this.field.htmlElement.empty();
+        this.field.empty();
         _.forEach(notes, item => this.addNote(item as Note));
     }
 

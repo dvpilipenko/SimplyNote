@@ -1,4 +1,5 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
 module.exports = {
@@ -7,6 +8,7 @@ module.exports = {
     devtool: 'inline-source-map',
     module: {
         rules: [
+            { test: /\.css$/, use: [MiniCssExtractPlugin.loader,'css-loader'] },
             {
                 test: /\.tsx?$/,
                 use: 'ts-loader',
@@ -23,9 +25,12 @@ module.exports = {
     },
     plugins: [ new HtmlWebpackPlugin(
         {title:"SimplyNote",
-            template: 'src/index.html'
+            template: 'src/index.html',
+
         },
-    )],
+    ),
+        new MiniCssExtractPlugin()
+    ],
     devServer: {
         inline:true,
         port: 10000
