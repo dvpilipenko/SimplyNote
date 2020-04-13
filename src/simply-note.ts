@@ -33,7 +33,6 @@ export class SimplyNote {
         htmlElement.width(width);
         this.field = htmlElement;
     }
-
     field: JQuery<HTMLElement>
 
     addNote(note: Note) {
@@ -78,8 +77,7 @@ export class SimplyNote {
     private isNecessaryScreenSize() {
         return window.screen.availHeight >= screenSize.height && window.screen.availWidth >= screenSize.width;
     }
-
-
+    
     private _setOnTopElement(elem: JQuery<HTMLElement>) {
         const htmlElem = elem.get(0);
         const elements = this.field.children().toArray();
