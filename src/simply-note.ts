@@ -33,6 +33,7 @@ export class SimplyNote {
         htmlElement.width(width);
         this.field = htmlElement;
     }
+
     field: JQuery<HTMLElement>
 
     addNote(note: Note) {
@@ -48,12 +49,9 @@ export class SimplyNote {
 
         htmlNote.append(this._createTextArea(note));
         this.field.append(htmlNote);
-
-        //Add an observer to the Note if it goes outside of the work area
-        this._addObserverIntersection(htmlNote);
     }
 
-    private _addObserverIntersection(note: JQuery<HTMLElement>) {
+    private _addObserverIntersection(note: JQuery<HTMLElement>):IntersectionObserver {
         const options = {
             root: this.field.get(0),
             rootMargin: '0px',
@@ -61,10 +59,11 @@ export class SimplyNote {
         }
         const observer = new IntersectionObserver(this._intersectionCallBack.bind(null, note), options);
         observer.observe(note.get(0));
+        return observer;
     }
 
     private _intersectionCallBack(note: any, entries: any) {
-        note.toggleClass("simply-note_trash", !entries[entries.length - 1].isIntersecting);
+            note.toggleClass("simply-note_trash", !entries[entries.length - 1].isIntersecting);
     }
 
     private _createTextArea(note: Note): JQuery<HTMLElement> {
@@ -77,13 +76,11 @@ export class SimplyNote {
     private isNecessaryScreenSize() {
         return window.screen.availHeight >= screenSize.height && window.screen.availWidth >= screenSize.width;
     }
-    
+
     private _setOnTopElement(elem: JQuery<HTMLElement>) {
-        const htmlElem = elem.get(0);
-        const elements = this.field.children().toArray();
-        const index = elements.indexOf(htmlElem);
-        elements.splice(index, 1);
-        elements.push(htmlElem);
+        elem.addClass('simply-note_drag');
+        const elements = this.field.children(':not(.simply-note_drag)').toArray();
+        elements.push(elem.get(0));
         this.field.append(elements)
     }
 
@@ -100,6 +97,9 @@ export class SimplyNote {
             // for dragging element set it on top
             this._setOnTopElement(elem);
 
+            //Add an observer to the Note if it goes outside of the work area
+            const observer = this._addObserverIntersection(elem);
+
             root.on("mouseup", () => {
                 root.off("mouseup");
                 root.off("mousemove");
@@ -107,6 +107,9 @@ export class SimplyNote {
 
                 //focus textArea if it is clicked
                 elem.children().first().trigger('focus');
+
+                elem.removeClass('simply-note_drag');
+                observer.disconnect();
             });
 
             root.on("mousemove", (e: any) => {
