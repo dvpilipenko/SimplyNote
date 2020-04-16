@@ -3,16 +3,16 @@ import {Note} from "./simply-note";
 
 export class Utils {
     static getIntValueFromHtmlElement(id: string): number {
-        return Number($(id).val() as string);
+        return parseInt($(id).val() as string);
     }
 
     static mapDivToNote(item: HTMLElement): Note {
         return {
-            width: Number(item.style.width),
-            height: Number(item.style.height),
-            yPos: Number(item.style.top),
-            xPos: Number(item.style.left),
-            zIndex: Number(item.style.zIndex),
+            width: parseInt(item.style.width),
+            height: parseInt(item.style.height),
+            yPos: parseInt(item.style.top),
+            xPos: parseInt(item.style.left),
+            zIndex: parseInt(item.style.zIndex),
             text: (item.children[0] as HTMLTextAreaElement).value
         }
     }
