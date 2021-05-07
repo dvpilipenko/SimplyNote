@@ -25,7 +25,7 @@
   "dependencies": {
     "@types/underscore": "^1.9.4",
     "jquery": "^3.4.1",
-    "underscore": "^1.9.2",
+    "underscore": "^1.12.1",
     "webpack": "^4.41.5"
   }
 }
